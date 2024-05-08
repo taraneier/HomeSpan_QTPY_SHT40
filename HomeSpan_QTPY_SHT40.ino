@@ -40,8 +40,6 @@
 //     remote devices.                                    //
 //                                                        //
 ////////////////////////////////////////////////////////////
-// #include <Adafruit_TestBed.h>
-// extern Adafruit_TestBed TB;
 
 #define DEFAULT_I2C_PORT &Wire
 
@@ -63,70 +61,36 @@ Adafruit_SHT4x sht4 = Adafruit_SHT4x();
 struct RemoteTempSensor : Service::TemperatureSensor {
 
   SpanCharacteristic *temp;
-  // SpanCharacteristic *hum;
-  // SpanCharacteristic *fault;
-  // SpanPoint *remoteTemp;
-  // const char *name;
-  // float temperature;
-  // float humidity;
   Adafruit_SHT4x sht4;// = Adafruit_SHT4x();
   sensors_event_t s_hum, s_temp;
   
   RemoteTempSensor(Adafruit_SHT4x &sht) : Service::TemperatureSensor(){
-    this->sht4 = sht;
-  
-    // this->name=name;
-    
+    this->sht4 = sht;  
     temp=new Characteristic::CurrentTemperature(-10.0);      // set initial temperature
     temp->setRange(-50,150);                                 // expand temperature range to allow negative values
-    
-    // hum=new Characteristic::CurrentRelativeHumidity(40.0);      // set initial temperature
-    // hum->setRange(0,100);                                 // expand temperature range to allow negative values
-    // fault=new Characteristic::StatusFault(1);                // set initial state = fault
-
-    // remoteTemp=new SpanPoint(macAddress,0,sizeof(float));    // create a SpanPoint with send size=0 and receive size=sizeof(float)
-
   } // end constructor
 
   void loop(){
     sht4.getEvent(&s_hum, &s_temp);
     temp->setVal(s_temp.temperature);
-    // hum->setVal(s_hum.relative_humidity);    
   } // loop
   
 };
 
 struct RemoteHumiditySensor : Service::HumiditySensor {
 
-  // SpanCharacteristic *temp;
   SpanCharacteristic *hum;
-  // SpanCharacteristic *fault;
-  // SpanPoint *remoteTemp;
-  // const char *name;
-  // float temperature;
-  // float humidity;
   Adafruit_SHT4x sht4;// = Adafruit_SHT4x();
   sensors_event_t s_hum, s_temp;
   
   RemoteHumiditySensor(Adafruit_SHT4x &sht) : Service::HumiditySensor(){
-    this->sht4 = sht;
-  
-    // this->name=name;
-    
-    // temp=new Characteristic::CurrentTemperature(-10.0);      // set initial temperature
-    // temp->setRange(-50,150);                                 // expand temperature range to allow negative values
-    
+    this->sht4 = sht;    
     hum=new Characteristic::CurrentRelativeHumidity(40.0);      // set initial temperature
     hum->setRange(0,100);                                 // expand temperature range to allow negative values
-    // fault=new Characteristic::StatusFault(1);                // set initial state = fault
-
-    // remoteTemp=new SpanPoint(macAddress,0,sizeof(float));    // create a SpanPoint with send size=0 and receive size=sizeof(float)
-
   } // end constructor
 
   void loop(){
     sht4.getEvent(&s_hum, &s_temp);
-    // temp->setVal(s_temp.temperature);
     hum->setVal(s_hum.relative_humidity);    
   } // loop
   
@@ -137,8 +101,6 @@ struct RemoteHumiditySensor : Service::HumiditySensor {
 void setup() {
   
   Serial.begin(115200);
-
- 
 
   homeSpan.setLogLevel(1);
   homeSpan.setStatusPixel(PIN_NEOPIXEL);
@@ -174,15 +136,13 @@ void setup() {
     new Service::AccessoryInformation();
       new Characteristic::Identify();
       new Characteristic::Name("Temperature");
-      // new Characteristic::Name("Humidity");
-    new RemoteTempSensor(sht4);        // pass MAC Address of Remote Device
+    new RemoteTempSensor(sht4);  
 
   new SpanAccessory();
     new Service::AccessoryInformation();
       new Characteristic::Identify();
-      // new Characteristic::Name("Temperature");
       new Characteristic::Name("Humidity");
-    new RemoteHumiditySensor(sht4);        // pass MAC Address of Remote Device
+    new RemoteHumiditySensor(sht4);
 } // end of setup()
 
 //////////////////////////////////////
